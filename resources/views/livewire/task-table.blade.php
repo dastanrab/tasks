@@ -92,7 +92,6 @@
             </div></div>
 
     </div>
-    <!-- Modal for Editing Task -->
     <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -125,15 +124,13 @@
 
 <script>
     $(document).ready(function () {
-        // Open the modal and load task data
+        window.can_add=true;
         $('.edit-btn').click(function () {
             let taskId = $(this).data('id');
             let taskRow = $('#task-' + taskId);
-
             $('#editTaskId').val(taskId);
             $('#editTaskDescription').val(taskRow.find('.task-description').text());
             $('#editTaskStatus').val(taskRow.find('.task-status').text());
-
             $('#editTaskModal').modal('show');
         });
         $('.delete-btn').click(function () {
@@ -144,9 +141,24 @@
                 success: function (response) {
                     $('#task-' + taskId).remove();
                     $('#editTaskModal').modal('hide');
+                    $.toast({
+                        heading: 'Success',
+                        text: response.msg,
+                        showHideTransition: 'slide',
+                        icon: 'success',
+                        position: 'top-right'
+                    })
                 },
                 error: function (xhr) {
-                    alert('Something went wrong! Please try again.');
+                    var err = JSON.parse(xhr.responseText);
+                    console.log(err);
+                    $.toast({
+                        heading: 'Error',
+                        text: err.msg,
+                        showHideTransition: 'fade',
+                        icon: 'error',
+                        position: 'top-right'
+                    })
                 }
             });
         });
@@ -179,9 +191,24 @@
 
                }
                 $('#editTaskModal').modal('hide');
+                    $.toast({
+                        heading: 'Success',
+                        text: response.msg,
+                        showHideTransition: 'slide',
+                        icon: 'success',
+                        position: 'top-right'
+                    })
             },
             error: function (xhr) {
-                alert('Something went wrong! Please try again.');
+                var err = JSON.parse(xhr.responseText);
+                console.log(err);
+                $.toast({
+                    heading: 'Error',
+                    text: err.msg,
+                    showHideTransition: 'fade',
+                    icon: 'error',
+                    position: 'top-right'
+                })
             }
         });
         });
@@ -204,6 +231,7 @@
                 },
                 success: function (response) {
                     console.log(response)
+                    window.can_add = false
                     let status='';
                     let priority='';
                     if (response.data.status === 'completed')
@@ -226,11 +254,18 @@
                     '<td>'+response.data.end_at+'</td>'+
                    '<td>'+ response.data.created_at_tehran+'</td>' +
                    ' <td>'+priority+'</td>'+
-                   '<td class="task-status">'+status+'</td>' + '<td> <button data-id="'+response.data.id+'" class="btn btn-primary btn-sm edit-btn">Edit</button></td>'+ '</tr>'
-                        + '<td> <button data-id="'+response.data.id+'" class="btn btn-danger btn-sm delete-btn">Delete</button></td>'+ '</tr>'
+                   '<td class="task-status">'+status+'</td>' + '<td> <button data-id="'+response.data.id+'" class="btn btn-primary btn-sm edit-btn">Edit</button>'
+                        + ' <button data-id="'+response.data.id+'" class="btn btn-danger btn-sm delete-btn">Delete</button></td>'+ '</tr>'
                     $('#taskTableBody').prepend(
                         content
                     );
+                    $.toast({
+                        heading: 'Success',
+                        text: response.msg,
+                        showHideTransition: 'slide',
+                        icon: 'success',
+                        position: 'top-right'
+                    })
                     $('#newTaskTitle').val('');
                     $('#newTaskDescription').val('');
                     $('#newTaskEndDate').val('');
@@ -238,10 +273,19 @@
                     $('#newTaskStatus').val('pending');
                 },
                 error: function (xhr) {
-                    alert('Failed to add task. Please try again.');
+                    var err = JSON.parse(xhr.responseText);
+                    console.log(err);
+                    $.toast({
+                        heading: 'Error',
+                        text: err.msg,
+                        showHideTransition: 'fade',
+                        icon: 'error',
+                        position: 'top-right'
+                    })
                 }
             });
         });
+
     });
 
     </script>
@@ -277,8 +321,8 @@
             '<td>'+data.task.end_at+'</td>'+
             '<td>'+ data.task.created_at_tehran+'</td>' +
             ' <td>'+priority+'</td>'+
-            '<td class="task-status">'+status+'</td>' + '<td> <button data-id="'+data.task.id+'" class="btn btn-primary btn-sm edit-btn">Edit</button></td>'+ '</tr>'
-            + '<td> <button data-id="'+data.task.id+'" class="btn btn-danger btn-sm delete-btn">Delete</button></td>'+ '</tr>'
+            '<td class="task-status">'+status+'</td>' + '<td> <button data-id="'+data.task.id+'" class="btn btn-primary btn-sm edit-btn">Edit</button>'+
+             ' <button data-id="'+data.task.id+'" class="btn btn-danger btn-sm delete-btn">Delete</button></td>'+ '</tr>'
         $('#taskTableBody').prepend(
             content
         );
@@ -313,7 +357,14 @@
             }if(data.type === 'delete') {
                 delete_task(data)
             }if (data.type === 'create') {
-                add_task(data)
+                if (window.can_add === true)
+                {
+                    add_task(data)
+                }
+                else {
+                    window.can_add=false
+                }
+
             }
         });
 </script>
