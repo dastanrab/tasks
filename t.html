@@ -1,0 +1,129 @@
+<div class="container mt-4">
+    <!-- Task Creation Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Add New Task</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-group mb-3">
+                <label for="newTaskTitle">Title</label>
+                <input type="text" id="newTaskTitle" class="form-control" placeholder="Enter task title">
+            </div>
+            <div class="form-group mb-3">
+                <label for="newTaskDescription">Description</label>
+                <input type="text" id="newTaskDescription" class="form-control" placeholder="Enter task description">
+            </div>
+            <div class="form-group mb-3">
+                <label for="newTaskEndDate">End Date</label>
+                <input type="date" id="newTaskEndDate" class="form-control">
+            </div>
+            <div class="form-group mb-3">
+                <label for="newTaskPriority">Priority</label>
+                <select id="newTaskPriority" class="form-select">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="newTaskStatus">Status</label>
+                <select id="newTaskStatus" class="form-select">
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <button id="createTaskBtn" class="btn btn-success">Add Task</button>
+        </div>
+    </div>
+
+    <!-- Task Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>End Date</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="taskTableBody">
+            @foreach ($tasks as $task)
+            <tr id="task-{{ $task['id'] }}">
+                <td>{{ $task['id'] }}</td>
+                <td>{{ $task['title'] }}</td>
+                <td class="task-description">{{ $task['description'] }}</td>
+                <td>{{ $task['end_date'] }}</td>
+                <td>{{ $task['priority'] }}</td>
+                <td class="task-status">{{ $task['status'] }}</td>
+                <td>
+                    <button data-id="{{ $task['id'] }}" class="btn btn-primary btn-sm edit-btn">Edit</button>
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // Handle the create task button click
+        $('#createTaskBtn').click(function () {
+            let title = $('#newTaskTitle').val();
+            let description = $('#newTaskDescription').val();
+            let endDate = $('#newTaskEndDate').val();
+            let priority = $('#newTaskPriority').val();
+            let status = $('#newTaskStatus').val();
+
+            $.ajax({
+                url: '/api/tasks',
+                method: 'POST',
+                data: {
+                    title: title,
+                    description: description,
+                    end_date: endDate,
+                    priority: priority,
+                    status: status,
+                },
+                success: function (response) {
+                    // Append the new task to the table
+                    $('#taskTableBody').append(`
+                        <tr id="task-${response.id}">
+
+<td>${response.id}</td>
+                            <td>${response.title}</td>
+                            <td class="task-description">${response.description}</td>
+                            <td>${response.end_date}</td>
+                            <td>${response.priority}</td>
+                            <td class="task-status">${response.status}</td>
+                            <td>
+                                <button data-id="${response.id}" class="btn btn-primary btn-sm edit-btn">Edit</button>
+                            </td>
+                        </tr>
+                    `);
+
+                    // Clear form fields after successful addition
+                    $('#newTaskTitle').val('');
+                    $('#newTaskDescription').val('');
+                    $('#newTaskEndDate').val('');
+                    $('#newTaskPriority').val('low');
+                    $('#newTaskStatus').val('pending');
+                },
+                error: function (xhr) {
+                    alert('Failed to add task. Please try again.');
+                }
+            });
+        });
+
+        // Existing code to handle task editing
+        // ...
+    });
+</script>
